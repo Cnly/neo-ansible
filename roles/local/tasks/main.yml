@@ -19,6 +19,8 @@
 
 - name: Deploy nss executable
   copy: src=files/nss dest=/opt/neo/nss/nss mode=0755
+  notify:
+      - restart neo-nss
 
 - name: Deploy nss systemd unit and config
   template: src={{ item.src }} dest={{ item.dest }}
