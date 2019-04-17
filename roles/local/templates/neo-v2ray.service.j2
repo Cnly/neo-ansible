@@ -1,0 +1,14 @@
+[Unit]
+Description=neo
+Requires=network-online.target
+After=network-online.target
+StartLimitInterval=0
+
+[Service]
+User=nobody
+ExecStart=/opt/neo/v2ray/v2ray -config /etc/neo/v2ray.config.json
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target

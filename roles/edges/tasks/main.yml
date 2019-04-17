@@ -1,0 +1,31 @@
+- name: Create /etc/neo/
+  file: path=/etc/neo state=directory mode=0755
+
+- name: Deploy config files
+  template: src={{ item.src }} dest={{ item.dest }}
+  loop:
+      - { src: 'iptables.rules.v4.j2', dest: '/etc/neo/iptables.rules.v4' }
+      - { src: 'iptables.rules.inner.v4.j2', dest: '/etc/neo/iptables.inner.rules.v4' }
+      - { src: 'ss-config.mc.json.j2', dest: '/etc/neo/ss-config.mc.json' }
+  notify:
+      - restart neo
+
+- name: Deploy startup files
+  template: src={{ item.src }} dest={{ item.dest }} mode=0755
+  loop:
+      - { src: 'setupnmc.sh.j2', dest: '/etc/neo/setupnmc.sh' }
+      - { src: 'runneo.sh.j2', dest: '/etc/neo/runneo.sh' }
+  notify:
+      - restart neo
+
+- name: Deploy systemd unit file
+  template: src=neo.service.j2 dest=/etc/systemd/system/neo.service
+  notify:
+      - restart neo
+
+- name: Start neo service
+  systemd:
+      name: neo
+      state: started
+      enabled: yes
+      daemon_reload: yes

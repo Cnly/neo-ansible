@@ -1,0 +1,4 @@
+hosts
+**/.*.swp
+*.retry
+roles/local/templates/v2ray.custom_rules.j2

@@ -1,0 +1,30 @@
+- name: Add stretch-backports for stretch
+  when: ansible_facts['distribution_release'] == 'stretch'
+  apt_repository:
+      repo: deb http://deb.debian.org/debian stretch-backports main
+      state: present
+      filename: stretch-backports
+
+- name: Install shadowsocks-libev for stretch
+  when: ansible_facts['distribution_release'] == 'stretch'
+  apt:
+      name: shadowsocks-libev
+      default_release: stretch-backports
+      state: latest
+
+- name: Add shadowsocks-libev ppa for xenial
+  when: ansible_facts['distribution_release'] == 'xenial'
+  apt_repository:
+      repo: ppa:max-c-lv/shadowsocks-libev
+      state: present
+      filename: ss-libev-ppa
+
+- name: Install shadowsocks-libev
+  apt:
+      name: shadowsocks-libev
+      state: latest
+
+- name: Install haveged
+  apt:
+      name: haveged
+      state: latest

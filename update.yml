@@ -1,0 +1,14 @@
+- hosts: relays
+  become: yes
+  roles:
+      - relays
+
+- hosts: edges
+  become: yes
+  roles:
+      - edges
+
+- hosts: local
+  become: yes
+  roles:
+      - local

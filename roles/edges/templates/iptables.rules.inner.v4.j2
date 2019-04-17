@@ -1,0 +1,13 @@
+# *nat
+# :PREROUTING ACCEPT [0:0]
+# :INPUT ACCEPT [0:0]
+# :OUTPUT ACCEPT [0:0]
+# :POSTROUTING ACCEPT [0:0]
+# -A PREROUTING -s 10.183.0.1/32 -j DNAT --to-destination {{ neo_listen }}
+# -A POSTROUTING -d 10.183.0.1/32 -j SNAT --to-source 10.183.0.2
+# COMMIT
+# *filter
+# :INPUT ACCEPT [0:0]
+# :FORWARD ACCEPT [0:0]
+# :OUTPUT ACCEPT [0:0]
+# COMMIT

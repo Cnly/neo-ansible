@@ -1,0 +1,17 @@
+- hosts: relays
+  become: yes
+  roles:
+      - relays-setup
+      - relays
+
+- hosts: edges
+  become: yes
+  roles:
+      - edges-setup
+      - edges
+
+- hosts: local
+  become: yes
+  roles:
+      - local-setup
+      - local

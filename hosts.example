@@ -1,0 +1,34 @@
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+---
+
+all:
+    children:
+        local:
+            hosts:
+                L:
+                    neo_listen: 192.168.1.1
+                    neo_port: 1234
+                    shadowsocks_password: "changeme"
+                    macvlan_mac_addrs:
+                        - "12:34:56:78:90:00"
+                        - "12:34:56:78:90:01"
+                        - "12:34:56:78:90:02"
+                        - "12:34:56:78:90:03"
+                        - "12:34:56:78:90:04"
+                        - "12:34:56:78:90:05"
+                        - "12:34:56:78:90:06"
+        relays:
+            hosts:
+                R1:
+        edges:
+            hosts:
+                E1:
+                    neo_listen: 100.0.0.1
+                    neo_port: 12301
+                    shadowsocks_password: "e1passwd"
+                E2:
+                    neo_listen: 100.0.0.2
+                    neo_port: 12302
+                    shadowsocks_password: "e2passwd"
+
+# vim: set ft=yaml:

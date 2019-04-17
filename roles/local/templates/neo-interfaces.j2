@@ -1,0 +1,10 @@
+{% for i in range(1, 7+1) %}
+auto neo-macvlan-{{ i }}
+iface neo-macvlan-{{ i }} inet dhcp
+	{% if macvlan_mac_addrs is defined and macvlan_mac_addrs[i-1] is defined %}
+	pre-up ip link add link {{ ansible_facts['default_ipv4']['interface'] }} address {{ macvlan_mac_addrs[i-1] }} neo-macvlan-{{ i }} type macvlan
+	{% else %}
+	pre-up ip link add link {{ ansible_facts['default_ipv4']['interface'] }} neo-macvlan-{{ i }} type macvlan
+	{% endif %}
+	post-down ip link del neo-macvlan-{{ i }}
+{% endfor %}

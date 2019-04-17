@@ -1,0 +1,25 @@
+#! /bin/bash
+
+nex='ip netns exec nmcns'
+
+ip netns del nmcns
+ip link del nmcve1
+
+ip netns add nmcns
+ip link add nmcve1 type veth peer name nmcve1p
+ip link set nmcve1 up
+ip link set nmcve1p netns nmcns
+$nex ip link set nmcve1p up
+
+ip addr add 10.183.0.1/24 dev nmcve1
+$nex ip addr add 10.183.0.2/24 dev nmcve1p
+
+{% for host in groups['edges'] %}
+$nex ip addr add {{ hostvars[host]['neo_listen'] }}/32 dev nmcve1p
+{% endfor %}
+{% for host in groups['relays'] %}
+$nex ip addr add {{ hostvars[host]['neo_listen'] }}/32 dev nmcve1p
+{% endfor %}
+$nex ip route add default via 10.183.0.1 dev nmcve1p
+
+$nex iptables-restore < /etc/neo/iptables.inner.rules.v4

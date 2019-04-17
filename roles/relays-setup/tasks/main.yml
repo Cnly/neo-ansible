@@ -1,0 +1,17 @@
+- name: Enable ip4 forwarding in sysctl.conf and reload
+  sysctl:
+      name: net.ipv4.ip_forward
+      value: 1
+      sysctl_set: yes
+      state: present
+      reload: yes
+
+- name: Install iptables-persistent
+  apt:
+      name: iptables-persistent
+      state: present
+
+- name: Install netfilter-persistent
+  apt:
+      name: netfilter-persistent
+      state: present

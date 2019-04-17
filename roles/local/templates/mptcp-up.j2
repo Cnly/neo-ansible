@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -e
+
+if [[ ! ( "$IFACE" = "{{ ansible_facts['default_ipv4']['interface'] }}" || "$IFACE" =~ ^neo.* ) ]]; then
+        exit 0
+fi
+
+IP=$(ip route list dev $IFACE | awk '{split($0,a,"\\s+"); print a[7]}')
+SUBNET=$(ip route list dev $IFACE | awk '{split($0,a,"\\s+"); print a[1]}')
+GATEWAY=$(ip route | grep default | awk '{split($0,a,"\\s+"); print a[3]}')
+TABLE=18$(printf '%02d' $(echo $IFACE | grep -oP '[0-9]+'))
+if [ "$IFACE" = "{{ ansible_facts['default_ipv4']['interface'] }}" ]; then
+    TABLE=1899
+fi
+
+ip rule add from $IP table $TABLE
+ip route add table $TABLE $SUBNET dev $IFACE scope link src $IP
+ip route add table $TABLE default via $GATEWAY dev $IFACE

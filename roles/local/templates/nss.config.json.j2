@@ -1,0 +1,33 @@
+{
+	"BindAddrs": [
+{% for edge in groups['edges'] %}
+	{% if not loop.last %}
+		"127.0.0.1:{{ hostvars[edge]['neo_port'] }}",
+	{% else %}
+		"127.0.0.1:{{ hostvars[edge]['neo_port'] }}"
+	{% endif %}
+{% endfor %}
+	],
+	"BufferLen": 65000,
+	"DialTimeoutMilliSeconds": 7000,
+	"Servers": [
+{% for edge in groups['edges'] %}
+	{% if not loop.last %}
+		"{{ hostvars[edge]['neo_listen'] }}",
+	{% else %}
+		{% if not groups['relays'] %}
+		"{{ hostvars[edge]['neo_listen'] }}"
+		{% else %}
+		"{{ hostvars[edge]['neo_listen'] }}",
+		{% endif %}
+	{% endif %}
+{% endfor %}
+{% for relay in groups['relays'] %}
+	{% if not loop.last %}
+		"{{ hostvars[relay]['neo_listen'] }}",
+	{% else %}
+		"{{ hostvars[relay]['neo_listen'] }}"
+	{% endif %}
+{% endfor %}
+	]
+}

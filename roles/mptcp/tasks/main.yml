@@ -1,0 +1,23 @@
+- name: Install dirmngr
+  apt:
+      name: dirmngr
+      state: present
+
+- name: Add mptcp kernel gpg-apt-key
+  apt_key:
+      keyserver: keys.gnupg.net
+      id: 379CE192D401AB61
+      state: present
+
+- name: Add mptcp kernel deb package apt repo
+  apt_repository:
+      repo: deb https://dl.bintray.com/cpaasch/deb stretch main
+      filename: mptcp
+      state: present
+
+- name: Install mptcp kernel deb package
+  apt:
+      update_cache: yes
+      name: linux-mptcp
+      state: latest
+

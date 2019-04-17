@@ -1,0 +1,96 @@
+{
+	"log": {
+		"loglevel": "info",
+		"access": "/var/log/v2ray_neo.access.log"
+	},
+	"dns": {},
+	"routing": {
+		"strategy": "rules",
+		"settings": {
+			"domainStrategy": "AsIs",
+			"rules": [
+{% include './templates/v2ray.custom_rules.j2' ignore missing %}
+				{
+					"type": "field",
+					"ip": [
+						"10.0.0.0/8",
+						"172.16.0.0/12",
+						"192.168.0.0/16",
+						"127.0.0.0/8"
+					],
+					"outboundTag": "blocked"
+				},
+				{
+					"type": "field",
+					"domain": [
+						"domain:localhost"
+					],
+					"outboundTag": "blocked"
+				}
+			]
+		}
+	},
+	"inbound": {
+		"port": {{ neo_port }},
+		"listen": "{{ neo_listen }}",
+		"protocol": "shadowsocks",
+		"settings": {
+			"method": "aes-256-cfb",
+			"udp": true,
+			"password": "{{ shadowsocks_password }}",
+			"ota": false
+		}
+	},
+	"outbound": {
+		"sendThrough": "0.0.0.0",
+		"protocol": "shadowsocks",
+		"settings": {
+			"servers": [
+{% for edge in groups['edges'] %}
+				{
+					"address": "127.0.0.1",
+					"port": {{ hostvars[edge]['neo_port'] }},
+					"method": "chacha20-ietf-poly1305",
+					"password": "{{ hostvars[edge]['shadowsocks_password'] }}",
+					"ota": false,
+					"udp": true
+	{% if not loop.last %}
+				},
+	{% else %}
+				}
+	{% endif %}
+{% endfor %}
+			]
+		},
+		"tag": "ipv4proxy"
+	},
+	"outboundDetour": [
+		{
+			"sendThrough": "0.0.0.0",
+			"protocol": "freedom",
+			"settings": {},
+			"tag": "ipv4direct"
+		},
+		{
+			"sendThrough": "::",
+			"protocol": "freedom",
+			"settings": {},
+			"tag": "ipv6direct"
+		},
+		{
+			"protocol": "blackhole",
+			"settings": {},
+			"tag": "blocked"
+		}
+	],
+	"policy": {
+		"levels": {
+			"0": {
+				"handshake": 10,
+				"connIdle": 300,
+				"uplinkOnly": 2,
+				"downlinkOnly": 2
+			}
+		}
+	}
+}

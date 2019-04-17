@@ -1,0 +1,12 @@
+[Unit]
+Description=neo
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+ExecStart=/etc/neo/runneo.sh
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target

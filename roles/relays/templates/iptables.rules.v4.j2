@@ -1,0 +1,16 @@
+*nat
+:PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+{% for host in groups['edges'] %}
+-A PREROUTING -p tcp -m tcp --dport {{ hostvars[host]['neo_port'] }} -j DNAT --to-destination {{ hostvars[host]['neo_listen'] }}
+-A PREROUTING -p udp -m udp --dport {{ hostvars[host]['neo_port'] }} -j DNAT --to-destination {{ hostvars[host]['neo_listen'] }}
+-A POSTROUTING -d {{ hostvars[host]['neo_listen'] }}/32 -j SNAT --to-source {{ ansible_facts['default_ipv4']['address'] }}
+{% endfor %}
+COMMIT
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+COMMIT

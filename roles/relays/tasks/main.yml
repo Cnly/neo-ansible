@@ -1,0 +1,11 @@
+- name: Deploy iptables config
+  template: src=iptables.rules.v4.j2 dest=/etc/iptables/rules.v4
+  notify:
+      - restart netfilter-persistent
+
+- name: Enable netfilter-persistent
+  systemd:
+      name: netfilter-persistent
+      state: started
+      enabled: yes
+      daemon_reload: yes

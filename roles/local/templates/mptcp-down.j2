@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -e
+
+if [[ ! ( "$IFACE" = "{{ ansible_facts['default_ipv4']['interface'] }}" || "$IFACE" =~ ^neo.* ) ]]; then
+        exit 0
+fi
+
+TABLE=18$(printf '%02d' $(echo $IFACE | grep -oP '[0-9]+'))
+if [ "$IFACE" = "{{ ansible_facts['default_ipv4']['interface'] }}" ]; then
+    TABLE=1899
+fi
+
+ip rule del table $TABLE
+ip route flush table $TABLE

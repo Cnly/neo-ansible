@@ -1,0 +1,71 @@
+- name: Create /etc/neo/
+  file: path=/etc/neo state=directory mode=0755
+
+- name: Create /etc/neo/nss/
+  file: path=/etc/neo/nss state=directory mode=0755
+
+- name: Create /var/log/v2ray_neo.access.log
+  copy:
+      content: ""
+      dest: /var/log/v2ray_neo.access.log
+      mode: 0666
+      force: no
+
+- name: Create /opt/neo/v2ray/
+  file: path=/opt/neo/v2ray state=directory mode=0755
+
+- name: Create /opt/neo/nss/
+  file: path=/opt/neo/nss state=directory mode=0755
+
+- name: Deploy nss executable
+  copy: src=files/nss dest=/opt/neo/nss/nss mode=0755
+
+- name: Deploy nss systemd unit and config
+  template: src={{ item.src }} dest={{ item.dest }}
+  loop:
+      - { src: 'neo-nss.service.j2', dest: '/etc/systemd/system/neo-nss.service' }
+      - { src: 'nss.config.json.j2', dest: '/etc/neo/nss/config.json' }
+  notify:
+      - restart neo-nss
+
+- name: Start nss service
+  systemd:
+      name: neo-nss
+      state: started
+      enabled: yes
+      daemon_reload: yes
+
+- name: Transfer v2ray zip file
+  copy:
+      src: files/v2ray.zip
+      dest: /opt/neo/
+  notify:
+      - deploy v2ray
+
+- name: Deploy v2ray systemd unit and config
+  template: src={{ item.src }} dest={{ item.dest }}
+  loop:
+      - { src: 'neo-v2ray.service.j2', dest: '/etc/systemd/system/neo-v2ray.service' }
+      - { src: 'v2ray.config.json.j2', dest: '/etc/neo/v2ray.config.json' }
+  notify:
+      - restart neo-v2ray
+
+- name: Start v2ray service
+  systemd:
+      name: neo-v2ray
+      state: started
+      enabled: yes
+      daemon_reload: yes
+
+- name: Deploy /etc/network/if-* scripts
+  template: src={{ item.src }} dest={{ item.dest }} mode=0755
+  loop:
+      - { src: 'mptcp-up.j2', dest: '/etc/network/if-up.d/mptcp-up' }
+      - { src: 'mptcp-down.j2', dest: '/etc/network/if-post-down.d/mptcp-down' }
+  notify:
+      - restart neo interfaces
+
+- name: Deploy /etc/network/interfaces.d/neo-interfaces
+  template: src=neo-interfaces.j2 dest=/etc/network/interfaces.d/neo-interfaces
+  notify:
+      - restart neo interfaces

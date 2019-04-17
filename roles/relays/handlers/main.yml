@@ -1,0 +1,6 @@
+- name: restart netfilter-persistent
+  systemd:
+      name: netfilter-persistent
+      state: restarted
+      enabled: yes
+      daemon_reload: yes
