@@ -1,33 +1,34 @@
-{
-	"BindAddrs": [
+[
+	{
+		"BindAddr": "127.0.0.1:18300",
+		"BufferLen": 65000,
+		"DialTimeoutMilliSeconds": 7000,
+		"Servers": [
 {% for edge in groups['edges'] %}
-	{% if not loop.last %}
-		"127.0.0.1:{{ hostvars[edge]['neo_port'] }}",
-	{% else %}
-		"127.0.0.1:{{ hostvars[edge]['neo_port'] }}"
-	{% endif %}
-{% endfor %}
-	],
-	"BufferLen": 65000,
-	"DialTimeoutMilliSeconds": 7000,
-	"Servers": [
-{% for edge in groups['edges'] %}
-	{% if not loop.last %}
-		"{{ hostvars[edge]['neo_listen'] }}",
-	{% else %}
-		{% if not groups['relays'] %}
-		"{{ hostvars[edge]['neo_listen'] }}"
+	{% set edge_loop = loop %}
+	{% for endpoint in groups['edges'] %}
+		{% if not loop.last %}
+			"{{ hostvars[endpoint]['neo_listen'] }}:{{ hostvars[edge]['neo_port'] }}",
 		{% else %}
-		"{{ hostvars[edge]['neo_listen'] }}",
+			{% if not groups['relays'] %}
+			"{{ hostvars[endpoint]['neo_listen'] }}:{{ hostvars[edge]['neo_port'] }}"
+			{% else %}
+			"{{ hostvars[endpoint]['neo_listen'] }}:{{ hostvars[edge]['neo_port'] }}",
+			{% endif %}
 		{% endif %}
-	{% endif %}
+	{% endfor %}
+	{% for endpoint in groups['relays'] %}
+		{% if not loop.last %}
+			"{{ hostvars[endpoint]['neo_listen'] }}:{{ hostvars[edge]['neo_port'] }}",
+		{% else %}
+			{% if edge_loop.last %}
+			"{{ hostvars[endpoint]['neo_listen'] }}:{{ hostvars[edge]['neo_port'] }}"
+			{% else %}
+			"{{ hostvars[endpoint]['neo_listen'] }}:{{ hostvars[edge]['neo_port'] }}",
+			{% endif %}
+		{% endif %}
+	{% endfor %}
 {% endfor %}
-{% for relay in groups['relays'] %}
-	{% if not loop.last %}
-		"{{ hostvars[relay]['neo_listen'] }}",
-	{% else %}
-		"{{ hostvars[relay]['neo_listen'] }}"
-	{% endif %}
-{% endfor %}
-	]
-}
+		]
+	}
+]

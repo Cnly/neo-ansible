@@ -46,20 +46,14 @@
 		"protocol": "shadowsocks",
 		"settings": {
 			"servers": [
-{% for edge in groups['edges'] %}
 				{
 					"address": "127.0.0.1",
-					"port": {{ hostvars[edge]['neo_port'] }},
+					"port": 18300,
 					"method": "chacha20-ietf-poly1305",
-					"password": "{{ hostvars[edge]['shadowsocks_password'] }}",
+					"password": "{{ hostvars[groups['edges'][0]]['shadowsocks_password'] }}",
 					"ota": false,
 					"udp": true
-	{% if not loop.last %}
-				},
-	{% else %}
 				}
-	{% endif %}
-{% endfor %}
 			]
 		},
 		"tag": "ipv4proxy"

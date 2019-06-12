@@ -21,14 +21,14 @@ all:
             hosts:
                 R1:
         edges:
+            vars:
+                shadowsocks_password: "passwd"
             hosts:
                 E1:
                     neo_listen: 100.0.0.1
                     neo_port: 12301
-                    shadowsocks_password: "e1passwd"
                 E2:
                     neo_listen: 100.0.0.2
                     neo_port: 12302
-                    shadowsocks_password: "e2passwd"
 
 # vim: set ft=yaml:
