@@ -3,7 +3,7 @@
 		"BindAddr": "127.0.0.1:18300",
 		"BufferLen": 65000,
 		"DialTimeoutMilliseconds": 7000,
-		"MinimumAcceptedLatencyMilliseconds": 40,
+		"MinimumAcceptedLatencyMilliseconds": 50,
 		"Servers": [
 {% for edge in groups['edges'] %}
 	{% set edge_loop = loop %}
