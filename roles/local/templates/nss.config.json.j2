@@ -4,32 +4,16 @@
 		"BufferLen": 65000,
 		"DialTimeoutMilliseconds": 7000,
 		"MinimumAcceptedLatencyMilliseconds": 50,
-		"Servers": [
+{% set servers = [] %}
 {% for edge in groups['edges'] %}
-	{% set edge_loop = loop %}
-	{% for endpoint in groups['edges'] %}
-		{% if not loop.last %}
-			"{{ hostvars[endpoint]['neo_listen'] }}:{{ hostvars[edge]['neo_port'] }}",
-		{% else %}
-			{% if not groups['relays'] %}
-			"{{ hostvars[endpoint]['neo_listen'] }}:{{ hostvars[edge]['neo_port'] }}"
-			{% else %}
-			"{{ hostvars[endpoint]['neo_listen'] }}:{{ hostvars[edge]['neo_port'] }}",
+	{% for endpoint_group in ['edges', 'relays'] %}
+		{% for endpoint in groups[endpoint_group] %}
+			{% if endpoint not in hostvars[edge]['blacklisted_routing_hosts'] %}
+				{{ servers.append( '%s:%d'|format(hostvars[endpoint]['neo_listen'], hostvars[edge]['neo_port']) ) }}
 			{% endif %}
-		{% endif %}
-	{% endfor %}
-	{% for endpoint in groups['relays'] %}
-		{% if not loop.last %}
-			"{{ hostvars[endpoint]['neo_listen'] }}:{{ hostvars[edge]['neo_port'] }}",
-		{% else %}
-			{% if edge_loop.last %}
-			"{{ hostvars[endpoint]['neo_listen'] }}:{{ hostvars[edge]['neo_port'] }}"
-			{% else %}
-			"{{ hostvars[endpoint]['neo_listen'] }}:{{ hostvars[edge]['neo_port'] }}",
-			{% endif %}
-		{% endif %}
+		{% endfor %}
 	{% endfor %}
 {% endfor %}
-		]
+		"Servers": {{ servers|tojson(indent=12) }}
 	}
 ]

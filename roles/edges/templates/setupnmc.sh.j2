@@ -14,12 +14,14 @@ $nex ip link set nmcve1p up
 ip addr add 10.183.0.1/24 dev nmcve1
 $nex ip addr add 10.183.0.2/24 dev nmcve1p
 
-{% for host in groups['edges'] %}
-$nex ip addr add {{ hostvars[host]['neo_listen'] }}/32 dev nmcve1p
+{% for endpoint_group in ['edges', 'relays'] %}
+	{% for endpoint in groups[endpoint_group] %}
+		{% if endpoint not in blacklisted_routing_hosts %}
+$nex ip addr add {{ hostvars[endpoint]['neo_listen'] }}/32 dev nmcve1p
+		{% endif %}
+	{% endfor %}
 {% endfor %}
-{% for host in groups['relays'] %}
-$nex ip addr add {{ hostvars[host]['neo_listen'] }}/32 dev nmcve1p
-{% endfor %}
+
 $nex ip route add default via 10.183.0.1 dev nmcve1p
 
 $nex iptables-restore < /etc/neo/iptables.inner.rules.v4

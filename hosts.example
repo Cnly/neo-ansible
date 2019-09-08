@@ -30,9 +30,11 @@ all:
                     neo_listen: 100.0.0.1
                     neo_port: 12301
                     traffic_limit_bytes: 214748364800
+                    blacklisted_routing_hosts: []
                 E2:
                     neo_listen: 100.0.0.2
                     neo_port: 12302
                     traffic_limit_bytes: 214748364800
+                    blacklisted_routing_hosts: []
 
 # vim: set ft=yaml:
