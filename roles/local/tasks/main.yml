@@ -17,6 +17,57 @@
 - name: Create /opt/neo/nss/
   file: path=/opt/neo/nss state=directory mode=0755
 
+- name: Create /opt/neo/neostats
+  file: path=/opt/neo/neostats state=directory mode=0755
+
+- name: Create /opt/neo/neostats/web
+  file: path=/opt/neo/neostats/web state=directory mode=0755
+
+- name: Create /var/neo
+  file: path=/var/neo state=directory mode=0755
+
+- name: Create /var/neo/neostats
+  file: path=/var/neo/neostats state=directory mode=0755
+
+- name: Deploy neostats toolset
+  template: src={{ item.src }} dest={{ item.dest }} mode=0755
+  loop:
+      - { src: 'neostats/neostats.py.j2', dest: '/opt/neo/neostats/neostats.py' }
+      - { src: 'neostats/prepareneostats.sh.j2', dest: '/opt/neo/neostats/prepareneostats.sh' }
+      - { src: 'neostats/resetneostats.sh.j2', dest: '/opt/neo/neostats/resetneostats.sh' }
+  notify:
+      - restart neostats
+
+- name: Deploy neostats systemd unit
+  template: src=neostats/neo-neostats.service.j2 dest=/etc/systemd/system/neo-neostats.service
+  notify:
+      - restart neostats
+
+- name: Start neostats service
+  systemd:
+      name: neo-neostats
+      state: started
+      enabled: yes
+      daemon_reload: yes
+
+- name: Deploy neostats rotation unit
+  template: src={{ item.src }} dest={{ item.dest }}
+  loop:
+      - { src: 'neostats/neo-neostats-rotate.service.j2', dest: '/etc/systemd/system/neo-neostats-rotate.service' }
+      - { src: 'neostats/neo-neostats-rotate.timer.j2', dest: '/etc/systemd/system/neo-neostats-rotate.timer' }
+  notify:
+      - restart neostats timer
+
+- name: Start neostats rotation timer
+  systemd:
+      name: neo-neostats-rotate.timer
+      state: started
+      enabled: yes
+      daemon_reload: yes
+
+- name: Deploy neostats webpage
+  template: src=neostats/index.html.j2 dest=/opt/neo/neostats/web/index.html
+
 - name: Deploy nss executable
   copy: src=files/nss dest=/opt/neo/nss/nss mode=0755
   notify:

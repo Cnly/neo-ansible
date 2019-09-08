@@ -1,0 +1,154 @@
+#! /usr/bin/env python3
+
+from concurrent.futures import ThreadPoolExecutor
+from collections import OrderedDict
+import subprocess as sp
+import signal
+import sys
+import time
+import json
+import os
+
+interval = 1  # seconds
+save_cycle = 60  # save stats to stats_file per (save_cycle * interval) seconds
+stats_file = '/var/neo/neostats/neostats.save'
+chain_input_name = 'NEOSTATSRX'
+chain_output_name = 'NEOSTATSTX'
+iptables_exe = 'iptables'
+remote_map = OrderedDict([
+{% for endpoint in groups['edges'] %}
+    ('{{ hostvars[endpoint]["neo_listen"] }}', '{{ endpoint }}'),
+{% endfor %}
+{% for endpoint in groups['relays'] %}
+    ('{{ hostvars[endpoint]["neo_listen"] }}', '{{ endpoint }}'),
+{% endfor %}
+    ('{{ lan_cidr }}', 'LAN'),
+])
+output_json = '/run/neostats/neostats.json'
+last_stats = None
+
+def create_rules():
+    for chain_name in (chain_input_name, chain_output_name):
+        if call_iptables('-N', chain_name) != 0:
+            print('Failed to create chain {}. Make sure you have root and this chain does not exist yet.'.format(chain_name))
+            print('If you want to delete this chain, run:')
+            print('./neostats.py deleterules')
+            quit(1)
+
+    remote_counter_init_bytes = {}
+    try:
+        with open(stats_file) as file:
+            remote_counter_init_bytes = json.load(file)
+        print('Loading stats from file')
+    except:
+        pass
+
+    ret = call_iptables('-I', 'INPUT', '-j', chain_input_name)
+    if ret != 0:
+        print('Failed to create jump rule in the INPUT chain. Please check for any error and manually delete the chains created by this program.')
+        quit(1)
+    ret = call_iptables('-I', 'OUTPUT', '-j', chain_output_name)
+    if ret != 0:
+        print('Failed to create jump rule in the OUTPUT chain. Please check for any error and manually delete the chains created by this program.')
+        quit(1)
+
+    for remote, remote_name in remote_map.items():
+        ret = call_iptables('-A', chain_input_name, '-c', '0', str(remote_counter_init_bytes.get(remote_name, (0, 0))[0]), '-s', remote)
+        if ret != 0:
+            print('Failed to create rule for remote {}. Please check for any error and manually delete the chains created by this program.'.format(remote_name))
+            quit(1)
+        ret = call_iptables('-A', chain_output_name, '-c', '0', str(remote_counter_init_bytes.get(remote_name, (0, 0))[1]), '-d', remote)
+        if ret != 0:
+            print('Failed to create rule for remote {}. Please check for any error and manually delete the chains created by this program.'.format(remote_name))
+            quit(1)
+    quit(0)
+
+def delete_rules():
+    code = 0
+    if call_iptables('-D', 'INPUT', '-j', chain_input_name) != 0:
+        print('Failed to delete jump rule from INPUT to {}.'.format(chain_input_name))
+        code = 1
+    if call_iptables('-D', 'OUTPUT', '-j', chain_output_name) != 0:
+        print('Failed to delete jump rule from OUTPUT to {}.'.format(chain_output_name))
+        code = 1
+    for chain_name in (chain_input_name, chain_output_name):
+        if call_iptables('-F', chain_name) != 0:
+            print('Failed to flush chain {}.'.format(chain_name))
+            code = 1
+        if call_iptables('-X', chain_name) != 0:
+            print('Failed to delete chain {}.'.format(chain_name))
+            code = 1
+    quit(code)
+
+def sigint_handler(signal, frame):
+    if last_stats:
+        print('Saving last stats..')
+        save_stats(last_stats)
+    quit(0)
+
+def assemble_iptables_cmd(*kargs, table='filter'):
+    ret = [iptables_exe, '-w', '-t', table]
+    return ret + list(kargs)
+
+def get_output_iptables(*kargs, **kwargs):
+    cmd = assemble_iptables_cmd(*kargs, **kwargs)
+    return sp.check_output(cmd).decode('utf-8')
+
+def call_iptables(*kargs, **kwargs):
+    cmd = assemble_iptables_cmd(*kargs, **kwargs)
+    return sp.call(cmd)
+
+def get_iptables_stats() -> OrderedDict:
+    '''returns OrderedDict {remote_name: (rx, tx), ...}'''
+    try:
+        rx_output = get_output_iptables('-nvxL', chain_input_name).split('\n')[2:-1]
+        tx_output = get_output_iptables('-nvxL', chain_output_name).split('\n')[2:-1]
+    except:
+        return None, None
+
+    ret = OrderedDict((name, [None, None]) for name in remote_map.values())
+    for line in rx_output:
+        s = line.split()
+        ret[remote_map[s[6]]][0] = int(s[1])
+    for line in tx_output:
+        s = line.split()
+        ret[remote_map[s[7]]][1] = int(s[1])
+
+    return ret
+
+def save_stats(stats):
+    with open(stats_file, 'w+') as file:
+        json.dump(stats, file, indent=4)
+
+if __name__ == '__main__':
+
+    if len(sys.argv) > 1:
+        if sys.argv[1] == 'deleterules':
+            delete_rules()
+        elif sys.argv[1] == 'createrules':
+            create_rules()
+
+    signal.signal(signal.SIGINT, sigint_handler)
+
+    os.makedirs(os.path.dirname(output_json), exist_ok=True)
+
+    count = 0
+    prev_stats = get_iptables_stats()
+    while True:
+        time.sleep(interval)
+        new_stats = get_iptables_stats()
+
+        stats = OrderedDict((remote_name, None) for remote_name in remote_map.values())
+        for remote_name in stats.keys():
+            prev = prev_stats[remote_name]
+            new = new_stats[remote_name]
+            stats[remote_name] = [new[0] - prev[0], new[1] - prev[1], new[0], new[1]]  # delta_in, delta_out, in, out
+
+        prev_stats = new_stats
+        last_stats = new_stats
+        with open(output_json, 'w') as file:
+            json.dump(stats, file, indent=4)
+
+        count += 1
+        if count % save_cycle == 0:
+            save_stats(new_stats)

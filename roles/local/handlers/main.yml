@@ -33,3 +33,17 @@
   listen: restart neo interfaces
   command: ifup -v neo-macvlan-{{ item }}
   loop: "{{ range(1, 7+1)|list }}"
+
+- name: restart neostats
+  listen: restart neostats
+  systemd:
+      name: neo-neostats
+      state: restarted
+      daemon_reload: yes
+
+- name: restart neostats timer
+  listen: restart neostats timer
+  systemd:
+      name: neo-neostats-rotate.timer
+      state: restarted
+      daemon_reload: yes

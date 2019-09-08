@@ -17,9 +17,11 @@ all:
                         - "12:34:56:78:90:04"
                         - "12:34:56:78:90:05"
                         - "12:34:56:78:90:06"
+                    lan_cidr: 10.0.0.0/8
         relays:
             hosts:
                 R1:
+                    traffic_limit_bytes: 214748364800
         edges:
             vars:
                 shadowsocks_password: "passwd"
@@ -27,8 +29,10 @@ all:
                 E1:
                     neo_listen: 100.0.0.1
                     neo_port: 12301
+                    traffic_limit_bytes: 214748364800
                 E2:
                     neo_listen: 100.0.0.2
                     neo_port: 12302
+                    traffic_limit_bytes: 214748364800
 
 # vim: set ft=yaml:

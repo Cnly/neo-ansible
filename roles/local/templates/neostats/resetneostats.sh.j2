@@ -1,0 +1,5 @@
+#! /bin/bash
+
+systemctl stop neo-neostats
+mv /var/neo/neostats/neostats.save /var/neo/neostats/neostats.save.$(date --date="yesterday" +%b%Y)
+systemctl start neo-neostats
