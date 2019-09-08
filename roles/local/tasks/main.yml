@@ -1,8 +1,15 @@
-- name: Create /etc/neo/
-  file: path=/etc/neo state=directory mode=0755
-
-- name: Create /etc/neo/nss/
-  file: path=/etc/neo/nss state=directory mode=0755
+- name: Create required directories
+  file: path={{ item.path }} state=directory mode=0755
+  loop:
+      - { path: '/etc/neo' }
+      - { path: '/etc/neo/nss' }
+      - { path: '/opt/neo' }
+      - { path: '/opt/neo/v2ray' }
+      - { path: '/opt/neo/nss' }
+      - { path: '/opt/neo/neostats' }
+      - { path: '/opt/neo/neostats/web' }
+      - { path: '/var/neo' }
+      - { path: '/var/neo/neostats' }
 
 - name: Create /var/log/v2ray_neo.access.log
   copy:
@@ -10,24 +17,6 @@
       dest: /var/log/v2ray_neo.access.log
       mode: 0666
       force: no
-
-- name: Create /opt/neo/v2ray/
-  file: path=/opt/neo/v2ray state=directory mode=0755
-
-- name: Create /opt/neo/nss/
-  file: path=/opt/neo/nss state=directory mode=0755
-
-- name: Create /opt/neo/neostats
-  file: path=/opt/neo/neostats state=directory mode=0755
-
-- name: Create /opt/neo/neostats/web
-  file: path=/opt/neo/neostats/web state=directory mode=0755
-
-- name: Create /var/neo
-  file: path=/var/neo state=directory mode=0755
-
-- name: Create /var/neo/neostats
-  file: path=/var/neo/neostats state=directory mode=0755
 
 - name: Deploy neostats toolset
   template: src={{ item.src }} dest={{ item.dest }} mode=0755
