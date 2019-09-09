@@ -11,12 +11,20 @@
       - { path: '/var/neo' }
       - { path: '/var/neo/neostats' }
 
-- name: Create /var/log/v2ray_neo.access.log
+- name: Create /var/log/neo
+  file: path=/var/log/neo state=directory owner=nobody group=nogroup mode=0755
+
+- name: Create /var/log/neo/v2ray-access.log
   copy:
       content: ""
-      dest: /var/log/v2ray_neo.access.log
-      mode: 0666
+      dest: /var/log/neo/v2ray-access.log
+      mode: 0644
       force: no
+      owner: nobody
+      group: nogroup
+
+- name: Deploy logrotate config
+  template: src=logrotate-neo-v2ray.j2 dest=/etc/logrotate.d/neo-v2ray
 
 - name: Deploy neostats toolset
   template: src={{ item.src }} dest={{ item.dest }} mode=0755

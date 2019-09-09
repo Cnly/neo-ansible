@@ -1,0 +1,15 @@
+/var/log/neo/v2ray-access.log {
+	weekly
+	rotate 42
+	compress
+	compresscmd /usr/bin/xz
+	compressext .xz
+	dateext
+	notifempty
+	missingok
+	create 0644 nobody nogroup
+	su nobody nogroup
+	postrotate
+		systemctl restart neo-v2ray
+	endscript
+}
