@@ -1,7 +1,15 @@
 #! /bin/bash
 
 /etc/neo/setupnmc.sh
+
 iptables-restore < /etc/neo/iptables.rules.v4
+
 sysctl -w net.ipv4.ip_forward=1
+sysctl -w net.netfilter.nf_conntrack_max=32768
+
 echo 1 > /sys/module/mptcp_fullmesh/parameters/create_on_err
-/sbin/ip netns exec nmcns /usr/bin/sudo -u nobody /usr/bin/ss-server -c /etc/neo/ss-config.mc.json
+
+/sbin/ip netns exec nmcns \
+	/usr/bin/prlimit --nofile=32768 \
+	/usr/bin/sudo -u nobody \
+	/usr/bin/ss-server -c /etc/neo/ss-config.mc.json
