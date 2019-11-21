@@ -10,6 +10,9 @@ sysctl -w net.netfilter.nf_conntrack_max=32768
 echo 1 > /sys/module/mptcp_fullmesh/parameters/create_on_err
 
 /sbin/ip netns exec nmcns \
+        sysctl --system
+
+/sbin/ip netns exec nmcns \
 	/usr/bin/prlimit --nofile=32768 \
 	/usr/bin/sudo -u nobody \
 	/usr/bin/ss-server -c /etc/neo/ss-config.mc.json
