@@ -11,7 +11,7 @@
 
 - name: Add mptcp kernel deb package apt repo
   apt_repository:
-      repo: deb https://dl.bintray.com/cpaasch/deb stretch main
+      repo: deb https://dl.bintray.com/multipath-tcp/mptcp_deb stable main
       filename: mptcp
       state: present
 
