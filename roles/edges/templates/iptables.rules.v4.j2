@@ -6,7 +6,6 @@
 -A PREROUTING -p tcp -m tcp --dport {{ neo_port }} -j DNAT --to-destination 10.183.0.2
 -A PREROUTING -p udp -m udp --dport {{ neo_port }} -j DNAT --to-destination 10.183.0.2
 -A POSTROUTING -d 10.183.0.2/32 -j SNAT --to-source 10.183.0.1
--A POSTROUTING -d 10.183.0.2/32 -j SNAT --to-source 10.183.0.1
 -A POSTROUTING -o {{ ansible_facts['default_ipv4']['interface'] }} -j SNAT --to-source {{ ansible_facts['default_ipv4']['address'] }}
 {% for host in groups['edges'] if host != inventory_hostname %}
 -A PREROUTING -p tcp -m tcp --dport {{ hostvars[host]['neo_port'] }} -j DNAT --to-destination {{ hostvars[host]['neo_listen'] }}
