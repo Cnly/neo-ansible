@@ -56,7 +56,11 @@
 				}
 			]
 		},
-		"tag": "ipv4proxy"
+		"tag": "ipv4proxy",
+		"mux": {
+			"enabled": false,
+			"concurrency": 8
+		}
 	},
 	"outboundDetour": [
 		{
@@ -82,8 +86,8 @@
 			"0": {
 				"handshake": 10,
 				"connIdle": 300,
-				"uplinkOnly": 2,
-				"downlinkOnly": 2
+				"uplinkOnly": 0,
+				"downlinkOnly": 0
 			}
 		}
 	}
