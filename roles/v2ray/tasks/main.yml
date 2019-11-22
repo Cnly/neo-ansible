@@ -1,0 +1,21 @@
+- name: Create required directories for v2ray
+  file: path={{ item.path }} state=directory mode=0755
+  loop:
+      - { path: '/opt/neo' }
+      - { path: '/opt/neo/v2ray' }
+
+- name: Transfer v2ray zip
+  when: "'local' in group_names"
+  copy:
+      src: files/v2ray.zip
+      dest: /opt/neo/
+  notify:
+      - deploy v2ray
+
+- name: Download v2ray zip
+  when: "'edges' in group_names"
+  get_url:
+      url: '{{ v2ray_download_url }}'
+      dest: /opt/neo/v2ray.zip
+  notify:
+      - deploy v2ray

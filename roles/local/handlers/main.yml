@@ -4,20 +4,6 @@
       state: restarted
       daemon_reload: yes
 
-- name: unzip v2ray
-  listen: deploy v2ray
-  unarchive:
-      src: /opt/neo/v2ray.zip
-      dest: /opt/neo/v2ray/
-      remote_src: yes
-
-- name: Ensure v2ray binaries executable bit set
-  listen: deploy v2ray
-  file: path={{ item }} mode=0755
-  loop:
-      - /opt/neo/v2ray/v2ray
-      - /opt/neo/v2ray/v2ctl
-
 - name: restart neo-v2ray
   systemd:
       name: neo-v2ray

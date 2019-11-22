@@ -1,0 +1,9 @@
+- hosts: local
+  become: yes
+  roles:
+      - v2ray
+
+- hosts: edges
+  become: yes
+  roles:
+      - v2ray

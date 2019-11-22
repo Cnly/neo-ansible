@@ -13,5 +13,6 @@
 - hosts: local
   become: yes
   roles:
+      - v2ray
       - local-setup
       - local

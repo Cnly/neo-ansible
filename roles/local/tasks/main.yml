@@ -85,13 +85,6 @@
       enabled: yes
       daemon_reload: yes
 
-- name: Transfer v2ray zip file
-  copy:
-      src: files/v2ray.zip
-      dest: /opt/neo/
-  notify:
-      - deploy v2ray
-
 - name: Deploy v2ray systemd unit and config
   template: src={{ item.src }} dest={{ item.dest }}
   loop:
