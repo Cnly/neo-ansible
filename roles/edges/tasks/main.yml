@@ -6,7 +6,7 @@
   loop:
       - { src: 'iptables.rules.v4.j2', dest: '/etc/neo/iptables.rules.v4' }
       - { src: 'iptables.rules.inner.v4.j2', dest: '/etc/neo/iptables.inner.rules.v4' }
-      - { src: 'ss-config.mc.json.j2', dest: '/etc/neo/ss-config.mc.json' }
+      - { src: 'v2ray.config.json.j2', dest: '/etc/neo/v2ray.config.json' }
   notify:
       - restart neo
 

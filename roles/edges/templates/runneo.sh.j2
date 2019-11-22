@@ -15,4 +15,4 @@ echo 1 > /sys/module/mptcp_fullmesh/parameters/create_on_err
 /sbin/ip netns exec nmcns \
 	/usr/bin/prlimit --nofile=32768 \
 	/usr/bin/sudo -u nobody \
-	/usr/bin/ss-server -c /etc/neo/ss-config.mc.json
+	/opt/neo/v2ray/v2ray -config /etc/neo/v2ray.config.json

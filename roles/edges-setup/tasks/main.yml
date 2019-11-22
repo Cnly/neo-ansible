@@ -1,5 +1,9 @@
 - include_role:
     name: mptcp
 
-- include_role:
-    name: shadowsocks-libev
+- name: Install required packages
+  apt:
+      name: "{{ item }}"
+      state: present
+  loop:
+      - unzip

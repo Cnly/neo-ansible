@@ -1,0 +1,82 @@
+{
+	"log": {
+		"loglevel": "info"
+	},
+	"dns": {},
+	"routing": {
+		"strategy": "rules",
+		"settings": {
+			"domainStrategy": "AsIs",
+			"rules": [
+{% include './templates/v2ray.custom_rules.j2' ignore missing %}
+				{
+					"type": "field",
+					"ip": [
+						"10.0.0.0/8",
+						"172.16.0.0/12",
+						"192.168.0.0/16",
+						"127.0.0.0/8"
+					],
+					"outboundTag": "blocked"
+				},
+				{
+					"type": "field",
+					"domain": [
+						"domain:localhost"
+					],
+					"outboundTag": "blocked"
+				}
+			]
+		}
+	},
+	"inbound": {
+		"port": {{ neo_port }},
+		"listen": "0.0.0.0",
+		"protocol": "shadowsocks",
+		"settings": {
+			"method": "chacha20-ietf-poly1305",
+			"udp": true,
+			"password": "{{ shadowsocks_password }}",
+			"ota": false
+		},
+		"streamSettings": {
+			"sockopt": {
+				"tcpFastOpen": true
+			}
+		}
+	},
+	"outbound": {
+		"sendThrough": "0.0.0.0",
+		"protocol": "freedom",
+		"settings": {},
+		"tag": "ipv4",
+		"streamSettings": {
+			"sockopt": {
+				"tcpFastOpen": true
+			}
+		}
+	},
+	"outboundDetour": [
+		{
+			"sendThrough": "::",
+			"protocol": "freedom",
+			"settings": {},
+			"tag": "ipv6"
+		},
+		{
+			"protocol": "blackhole",
+			"settings": {},
+			"tag": "blocked"
+		}
+	],
+	"policy": {
+		"levels": {
+			"0": {
+				"handshake": 7,
+				"connIdle": 300,
+				"uplinkOnly": 0,
+				"downlinkOnly": 0
+			}
+		}
+	}
+}
