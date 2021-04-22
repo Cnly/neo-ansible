@@ -4,6 +4,11 @@
 		"BufferLen": 65000,
 		"DialTimeoutMilliseconds": 7000,
 		"MinimumAcceptedLatencyMilliseconds": 50,
+		"ConnectionPooling": {
+			"PoolSize": 4,
+			"MinimumTimeoutMilliseconds": 45000,
+			"MinimumTimeoutIncrementMilliseconds": 300
+		},
 {% set servers = [] %}
 {% for edge in groups['edges'] %}
 	{% for endpoint_group in ['edges', 'relays'] %}

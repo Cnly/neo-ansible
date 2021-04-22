@@ -40,8 +40,18 @@
 			"ota": false
 		},
 		"streamSettings": {
+			"network": "tcp",
+			"security": "none",
+			"tlsSettings": {
+				"allowInsecure": true
+			},
 			"sockopt": {
 				"tcpFastOpen": true
+			},
+			"tcpSettings": {
+				"header": {
+					"type": "http"
+				}
 			}
 		}
 	},
@@ -72,9 +82,9 @@
 	"policy": {
 		"levels": {
 			"0": {
-				"handshake": 7,
+				"handshake": 25,
 				"connIdle": 300,
-				"uplinkOnly": 0,
+				"uplinkOnly": 10,
 				"downlinkOnly": 0
 			}
 		}

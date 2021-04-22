@@ -10,6 +10,11 @@
   notify:
       - restart neo
 
+- name: Deploy sysctl config
+  template: src=sysctl.d/neo.conf dest=/etc/sysctl.d/neo.conf
+  notify:
+      - sysctl-system
+
 - name: Deploy startup files
   template: src={{ item.src }} dest={{ item.dest }} mode=0755
   loop:

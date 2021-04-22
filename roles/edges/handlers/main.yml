@@ -1,2 +1,5 @@
 - name: restart neo
   systemd: name=neo state=restarted daemon_reload=yes
+
+- name: sysctl-system
+  shell: sysctl --system

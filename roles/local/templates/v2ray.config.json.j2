@@ -30,39 +30,58 @@
 			]
 		}
 	},
-	"inbound": {
-		"port": {{ neo_port }},
-		"listen": "{{ neo_listen }}",
-		"protocol": "shadowsocks",
-		"settings": {
-			"method": "aes-256-cfb",
-			"udp": true,
-			"password": "{{ shadowsocks_password }}",
-			"ota": false
+	"inbounds": [
+{% include './templates/v2ray.custom_inbounds.j2' ignore missing %}
+		{
+			"port": {{ neo_port }},
+			"listen": "{{ neo_listen }}",
+			"protocol": "shadowsocks",
+			"settings": {
+				"method": "aes-256-cfb",
+				"udp": true,
+				"password": "{{ shadowsocks_password }}",
+				"ota": false
+			}
 		}
-	},
-	"outbound": {
-		"sendThrough": "0.0.0.0",
-		"protocol": "shadowsocks",
-		"settings": {
-			"servers": [
-				{
-					"address": "127.0.0.1",
-					"port": 18300,
-					"method": "chacha20-ietf-poly1305",
-					"password": "{{ hostvars[groups['edges'][0]]['shadowsocks_password'] }}",
-					"ota": false,
-					"udp": true
+	],
+	"outbounds": [
+{% include './templates/v2ray.custom_outbounds.j2' ignore missing %}
+		{
+			"sendThrough": "0.0.0.0",
+			"protocol": "shadowsocks",
+			"settings": {
+				"servers": [
+					{
+						"address": "127.0.0.1",
+						"port": 18300,
+						"method": "chacha20-ietf-poly1305",
+						"password": "{{ hostvars[groups['edges'][0]]['shadowsocks_password'] }}",
+						"ota": false,
+						"udp": true
+					}
+				]
+			},
+			"streamSettings": {
+				"network": "tcp",
+				"security": "none",
+				"tlsSettings": {
+					"allowInsecure": true
+				},
+				"sockopt": {
+					"tcpFastOpen": true
+				},
+				"tcpSettings": {
+					"header": {
+						"type": "http"
+					}
 				}
-			]
+			},
+			"tag": "ipv4proxy",
+			"mux": {
+				"enabled": false,
+				"concurrency": 8
+			}
 		},
-		"tag": "ipv4proxy",
-		"mux": {
-			"enabled": false,
-			"concurrency": 8
-		}
-	},
-	"outboundDetour": [
 		{
 			"sendThrough": "0.0.0.0",
 			"protocol": "freedom",
